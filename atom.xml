@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://superkoenigsegg.github.io/Miyagi.github.io</id>
     <title>Gridea</title>
-    <updated>2020-06-27T08:56:28.640Z</updated>
+    <updated>2020-06-28T13:35:30.256Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://superkoenigsegg.github.io/Miyagi.github.io"/>
     <link rel="self" href="https://superkoenigsegg.github.io/Miyagi.github.io/atom.xml"/>
@@ -10,6 +10,260 @@
     <logo>https://superkoenigsegg.github.io/Miyagi.github.io/images/avatar.png</logo>
     <icon>https://superkoenigsegg.github.io/Miyagi.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, Gridea</rights>
+    <entry>
+        <title type="html"><![CDATA[构建私有npm库]]></title>
+        <id>https://superkoenigsegg.github.io/Miyagi.github.io/post/gou-jian-si-you-npm-ku/</id>
+        <link href="https://superkoenigsegg.github.io/Miyagi.github.io/post/gou-jian-si-you-npm-ku/">
+        </link>
+        <updated>2020-06-28T06:50:31.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="搭建理由-参考网上的">搭建理由（😄 参考网上的）</h2>
+<ul>
+<li>确保npm服务快速、稳定：对于企业来说，上线生产系统的时候，需要花半小时甚至更久等待npm模块依赖安装完毕，是不可接受的。部署镜像后，可以确保高速、稳定的npm服务。</li>
+<li>发布私有模块：官方的npm上的模块全部是开源的。一些与企业业务逻辑相关的模块可能不适合开源。这部分私有的模块放在私有NPM仓库中，使用起来各种方便。</li>
+<li>控制npm模块质量和安全：npm上的模块质量参差不齐，搭建私有仓库，可以更严格地控制模块的质量和安全，只有经过审核的模块才允许被加入私有仓库。</li>
+</ul>
+<h1 id="运行环境">运行环境</h1>
+<pre><code>操作系统： CentOS 7.5 64位
+nodejs：v12.10.0
+cnpmjs.org：2.19.4
+MySQL：5.5.65
+</code></pre>
+<h1 id="安装nodejs">安装nodejs</h1>
+<h3 id="使用wget方式安装nodejs服务">使用wget方式安装nodejs服务</h3>
+<pre><code>// 下载
+wget https://nodejs.org/dist/v12.10.0/node-v12.10.0-linux-x64.tar.xz
+
+// 解压
+tar xvf node-v12.10..0-linux-x64.tar.xz
+
+// 修改为简洁的文件夹名称
+mv node-v12.10.0-linux-x64 node-v12.10.0
+
+// 设置node&amp;npm为全局可用
+ln -s /node-v12.10.0/bin/node /usr/bin/node
+ln -s /node-v12.10.0/bin/npm /usr/bin/npm
+
+// 验证nodejs服务是否安装成功
+node -v
+npm -v
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://superkoenigsegg.github.io/Miyagi.github.io/post-images/1593330693535.png" alt="" loading="lazy"></figure>
+<h1 id="安装mysql-mariadb此处有坑当然有可能是我自己安装的问题最终换成了mysql">安装mysql mariadb（此处有坑，当然有可能是我自己安装的问题，最终换成了mysql）</h1>
+<h3 id="私有库依赖数据库这里使用的是mariadb">私有库依赖数据库，这里使用的是mariadb</h3>
+<pre><code>yum -y install mariadb mariadb-server
+
+// 启动服务
+systemctl start mariadb.service
+// 设置开机启动
+systemctl enable mariadb.service
+
+// 配置，首次运行会提示输入密码，直接回车即可
+// 其他按提示进行设置
+mysql_secure_installation
+</code></pre>
+<h1 id="安装cnpmjsorg">安装cnpmjs.org</h1>
+<h3 id="cnpmjsorg选用目前稳定2194版本">cnpmjs.org选用目前稳定2.19.4版本</h3>
+<pre><code>npm i -g cnpmjs.org@2.19.4
+</code></pre>
+<h3 id="安装成功后安装目录应该是在-node-v12100libnode_modulescnpmjsorg-下如果不是请自行找到安装目录进去该目录对其进行一些配置修改配置文件为configindexjs">安装成功后，安装目录应该是在 <code>/node-v12.10.0/lib/node_modules/cnpmjs.org</code> 下（如果不是请自行找到安装目录），进去该目录对其进行一些配置修改（配置文件为config/index.js）</h3>
+<pre><code>var config = {
+  registryPort: 7001,         // 仓库端口
+  webPort: 7002,              // web站点端口
+  bindingHost: '0.0.0.0', // 设置为0.0.0.0对外可访问
+  
+   // 设置管理员
+  admins: {
+    // name: email
+    xxx: 'xxx@xxx.com'
+  },
+  
+  // 配置数据库信息
+  database: {
+    db: 'cnpmjs',
+    username: 'root',
+    password: '123456',
+    dialect: 'mysql',
+    host: '127.0.0.1',
+    port: 3306,
+  },
+  
+  // 设置私库命名空间
+  scopes: [ '@xxx' ],
+}
+</code></pre>
+<pre><code>{
+  &quot;registryPort&quot;: 7001, // cnpmjs.org web 站点端口
+  &quot;webPort&quot;: 7002, // cnpmjs.org register 端口
+  &quot;bindingHost&quot;: &quot;0.0.0.0&quot;, // 允许外部访问
+  &quot;handleSyncRegistry&quot;: &quot;http://127.0.0.1:7001&quot;, // 同步源
+  &quot;registryHost&quot;: &quot;registry.npm.xxxxxx.work&quot;, // cnpmjs.org register 域名
+  &quot;scopes&quot;: [
+    &quot;@xxxxxx&quot; // 私有包 scope 名称
+  ],
+  &quot;enablePrivate&quot;: false, // 允许所有登录用户发布私有包
+  &quot;syncModel&quot;: &quot;none&quot;, // 不同步公共包
+  &quot;alwaysAuth&quot;: false, // 不强制用户认证
+  &quot;customReadmeFile&quot;: &quot;/root/.cnpmjs.org/docs/web/readme.md&quot;, // 自定义首页
+  &quot;userService&quot;: &quot;/root/.cnpmjs.org/services/custom_user_service.js&quot;, // 自定义用户认证
+  &quot;admins&quot;: {
+    &quot;admin&quot;: &quot;admin@xxxx.com&quot; // cnpmjs.org 管理员
+  },
+  &quot;database&quot;: { // cnpmjs.org 数据库
+    &quot;db&quot;: &quot;cnpmjs_test&quot;, // 数据库名称
+    &quot;username&quot;: &quot;root&quot;, // 数据库用户名
+    &quot;password&quot;: &quot;&quot;, // 数据库密码
+    &quot;dialect&quot;: &quot;sqlite&quot;, // 数据库类型
+    &quot;host&quot;: &quot;127.0.0.1&quot;, // 数据库 IP
+    &quot;port&quot;: 3306, // 数据库端口
+    &quot;storage&quot;: &quot;/root/.cnpmjs.org/data.sqlite&quot; // sqlite 数据库位置
+  }
+</code></pre>
+<pre><code>/*
+ * server configure //服务器配置
+ */
+
+registryPort: 7001,         //仓库访问端口（执行发布安装）
+webPort: 7002,              //展示查询站点访问端口
+bindingHost: '',            //监听绑定的 Host，默认127.0.0.1，外网访问注释掉此项即可
+
+
+/**
+* database config           //数据库相关设置
+*/
+
+database: {
+    db: 'cnpmjs',           //数据库名称
+    username: 'root',       //数据库访问账号
+    password: '123456',     //数据库访问密码
+
+    // the sql dialect of the database
+    // - currently supported: 'mysql', 'sqlite', 'postgres', 'mariadb'
+    dialect: 'mysql',       //使用数据库，默认sqlite，这里我们改成mysql
+
+    // custom host; default: 127.0.0.1
+    host: '127.0.0.1',      //数据库访问IP，通常127.0.0.1
+
+    // custom port; default: 3306
+    port: 3306,             //数据库访问端口，通常3306
+
+
+// 模块文件存储，默认将发布的私有模块跟缓存公共模块存储在本地文件系统中，路径~/.cnpmjs.org/nfs ,也就是模块文件都存储在这个目录下；或者可以选择三方储存方式比如七牛等，着这里配置插件；也支持接口开发扩展储存；
+
+nfs: require('fs-cnpm')({
+    dir: path.join(dataDir, 'nfs')
+}),
+
+// registry url name        //模块注册列表访问域名，默认r.cnpmjs.org，安装模块时会到这个域名下查找，这个默认设置略坑，建议没有外网域名的先清空回头再配
+registryHost: '',
+
+
+// default system admins    //默认管理员账号
+  admins: {
+    // name: email
+    //fengmk2: 'fengmk2@gmail.com',
+    admin: 'admin@cnpmjs.org',
+    //dead_horse: 'dead_horse@qq.com',
+  },
+
+
+/*
+ * registry mode config  私有模块发布相关配置
+*/
+
+  //是否开启私有模式，默认为 false；
+  //私有模式下只有管理员能发布模块，其他账号只有同步权限
+  //非私有模式，注册用户都可以发布模块
+  enablePrivate: false, 
+
+  // registry scopes
+  //若为非私有模式发布则此项必填，非管理员发布模块式命名必须以scopes字段开头，模块命名示例“@cnpm/packagename”
+  //更多了解npm-scope请查阅https://docs.npmjs.com/misc/scope
+  scopes: [ '@cnpm', '@cnpmtest', '@cnpm-test' ],
+
+  // 私有模块非scopes白名单，各种非以scope方式发布的老模块的白名单管理，数组形式维护
+  privatePackages: [],
+
+
+/**
+* sync configs 同步源仓库相关设置
+*/
+
+//npm官方registry地址，不会直接从这个地址同步模块，但有时会从这里获取模块信息，除非必要请勿更改
+officialNpmRegistry: 'https://registry.npmjs.com',
+officialNpmReplicate: 'https://replicate.npmjs.com',
+
+//同步模块上游registry地址
+sourceNpmRegistry: 'https://registry.npm.taobao.org',
+
+//上游registry是否是cnpm，默认true，若要使用npm官方地址作为同步上游，请设置为false
+sourceNpmRegistryIsCNpm: true,
+
+//若安装时模块不存在，是否向源registry进行同步，默认true
+syncByInstall: true,
+
+// 同步模式选项
+// none: 不进行同步，只管理用户上传的私有模块，公共模块直接从上游获取
+// exist: 只同步已经存在于数据库的模块
+// all: 定时同步所有源registry的模块
+syncModel: 'exist', // 'none', 'all', 'exist'
+
+// 同步时间间隔，默认10分钟
+syncInterval: '10m',
+
+
+// 是否同步模块中devDependencies，默认false
+syncDevDependencies: false,
+
+//用户账号系统接入，可以扩展接入公司的账号系统
+//详见https://github.com/cnpm/cnpmjs.org/wiki/Use-Your-Own-User-Authorization
+userService: null,
+
+enableAbbreviatedMetadata: true
+</code></pre>
+<h1 id="建数据库并导入sql数据表">建数据库并导入sql数据表</h1>
+<h3 id="在cnpmjsorg目录下登录数据库">在/cnpmjs.org目录下登录数据库</h3>
+<pre><code>mysql -uroot -pxxx  // xxx为你设置的密码
+</code></pre>
+<h3 id="哈哈哈-报错了">哈哈哈 报错了</h3>
+<h3 id="忘了截图jpg">忘了截图.jpg</h3>
+<h3 id="错误信息应该是-error-1045-28000-access-denied-for-user-rootlocalhost-using-password-no">错误信息应该是 ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: NO)</h3>
+<h2 id="百度了一个方法">百度了一个方法</h2>
+<h3 id="首先停掉数据库服务">首先停掉数据库服务</h3>
+<pre><code>systemctl stop mariadb.service
+</code></pre>
+<h3 id="使用mysqld_safe来启动mysqld服务器-显示时-ctrlc-退出">使用mysqld_safe来启动mysqld服务器; 显示：时 Ctrl+c 退出</h3>
+<pre><code>mysqld_safe --user=mysql --skip-grant-tables --skip-networking &amp;
+</code></pre>
+<h3 id="再登录">再登录</h3>
+<pre><code>mysql -u root -p
+</code></pre>
+<h2 id="嗨-还真好了不过远程连接还是连不上定位后发现端口不是-3306-而是-0">嗨 还真好了，不过远程连接还是连不上；定位后发现端口不是 <code>3306</code> 而是 <code>0</code></h2>
+<h3 id="改呗-mysql-配置文件路径是-etcmycnf-添加prot">改呗 mysql 配置文件路径是 <code>/etc/my.cnf</code> 添加prot</h3>
+<pre><code>port = 3306
+</code></pre>
+<h3 id="改了之后发现又出现了一些列不可描述的问题-emmm-算了还是直接安装mysql吧">改了之后发现又出现了一些列不可描述的问题 emmm😂 算了，还是直接安装mysql吧</h3>
+<h1 id="安装mysql">安装mysql</h1>
+<p>我参考的这个<a href="https://www.jianshu.com/p/276d59cbc529">安装mysql</a></p>
+<h3 id="执行到第8步-8-添加软连接并重启mysql服务-这步时报错了">执行到第8步 8、添加软连接，并重启mysql服务 这步时报错了</h3>
+<pre><code>ln -s /usr/local/mysql/bin/mysql /usr/bin/mysql
+</code></pre>
+<h3 id="原因是-我之前的操作导致-usrbinmysql-已经存在了-删了在操作一遍就行了">原因是 我之前的操作导致 <code>/usr/bin/mysql</code> 已经存在了 删了在操作一遍就行了</h3>
+<h1 id="回到主线-运行服务">回到主线 运行服务</h1>
+<pre><code>npm run start
+</code></pre>
+<h3 id="仓库访问地址1270017001web访问地址1270017002">仓库访问地址<code>127.0.0.1:7001</code>；web访问地址<code>127.0.0.1:7002</code></h3>
+<h1 id="访问web地址">访问web地址</h1>
+<figure data-type="image" tabindex="2"><img src="https://superkoenigsegg.github.io/Miyagi.github.io/post-images/1593340452082.png" alt="" loading="lazy"></figure>
+<h1 id="搭建完毕">搭建完毕</h1>
+<h3 id="还可以自定义首页-自定义用户认证-那就待续吧">还可以自定义首页 自定义用户认证。。。那就待续吧</h3>
+<h1 id="参考">参考</h1>
+<p><a href="https://www.jianshu.com/p/d4def0ec7cdf">使用cnpmjs.org搭建私有npm库完整教程</a><br>
+<a href="https://blog.csdn.net/sir1241/article/details/82227648">基于cnpmjs.org构建企业私有npm库</a><br>
+<a href="https://www.centos.bz/2018/03/%E5%9C%A8-centos-7-%E5%B9%B3%E5%8F%B0%E4%BD%BF%E7%94%A8-cnpmjs-org-%E6%90%AD%E5%BB%BA-npm-%E7%A7%81%E6%9C%89%E4%BB%93%E5%82%A8/">在 CentOS 7 平台使用 cnpmjs.org 搭建 npm 私有仓储</a><br>
+<a href="https://www.jianshu.com/p/276d59cbc529">Linux下安装mysql</a><br>
+<a href="https://www.cnblogs.com/jymz/p/4511284.html">使用cnpm搭建企业内部私有NPM仓库</a></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Hello Gridea]]></title>
         <id>https://superkoenigsegg.github.io/Miyagi.github.io/post/hello-gridea/</id>
