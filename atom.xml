@@ -1,34 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://superkoenigsegg.github.io/Miyagi.github.io</id>
-    <title>Gridea</title>
-    <updated>2020-06-28T13:45:18.665Z</updated>
+    <title>Celtics</title>
+    <updated>2020-06-29T10:41:25.857Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://superkoenigsegg.github.io/Miyagi.github.io"/>
     <link rel="self" href="https://superkoenigsegg.github.io/Miyagi.github.io/atom.xml"/>
-    <subtitle>温故而知新</subtitle>
+    <subtitle>人生而自由，却无往不在枷锁之中</subtitle>
     <logo>https://superkoenigsegg.github.io/Miyagi.github.io/images/avatar.png</logo>
     <icon>https://superkoenigsegg.github.io/Miyagi.github.io/favicon.ico</icon>
-    <rights>All rights reserved 2020, Gridea</rights>
+    <rights>All rights reserved 2020, Celtics</rights>
     <entry>
         <title type="html"><![CDATA[构建私有npm库]]></title>
         <id>https://superkoenigsegg.github.io/Miyagi.github.io/post/gou-jian-si-you-npm-ku/</id>
         <link href="https://superkoenigsegg.github.io/Miyagi.github.io/post/gou-jian-si-you-npm-ku/">
         </link>
         <updated>2020-06-28T06:50:31.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="搭建理由-参考网上的">搭建理由（😄 参考网上的）</h2>
+        <summary type="html"><![CDATA[<p>👉 基于<strong>cnpm</strong>搭建<strong>npm私有仓库</strong><br>
+😄 这是第二次搭建了，第一次搭建后没有使用，之后服务器重置了；为了方便以后搭建，记录一下；</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>👉 基于<strong>cnpm</strong>搭建<strong>npm私有仓库</strong><br>
+😄 这是第二次搭建了，第一次搭建后没有使用，之后服务器重置了；为了方便以后搭建，记录一下；</p>
+<!-- more -->
+<h2 id="搭建理由-参考网上的">搭建理由（😄 参考网上的）</h2>
 <ul>
 <li>确保npm服务快速、稳定：对于企业来说，上线生产系统的时候，需要花半小时甚至更久等待npm模块依赖安装完毕，是不可接受的。部署镜像后，可以确保高速、稳定的npm服务。</li>
 <li>发布私有模块：官方的npm上的模块全部是开源的。一些与企业业务逻辑相关的模块可能不适合开源。这部分私有的模块放在私有NPM仓库中，使用起来各种方便。</li>
 <li>控制npm模块质量和安全：npm上的模块质量参差不齐，搭建私有仓库，可以更严格地控制模块的质量和安全，只有经过审核的模块才允许被加入私有仓库。</li>
 </ul>
-<h1 id="运行环境">运行环境</h1>
+<h2 id="运行环境">运行环境</h2>
 <pre><code>操作系统： CentOS 7.5 64位
 nodejs：v12.10.0
 cnpmjs.org：2.19.4
 MySQL：5.5.65
 </code></pre>
-<h1 id="安装nodejs">安装nodejs</h1>
+<h2 id="安装nodejs">安装nodejs</h2>
 <h3 id="使用wget方式安装nodejs服务">使用wget方式安装nodejs服务</h3>
 <pre><code>// 下载
 wget https://nodejs.org/dist/v12.10.0/node-v12.10.0-linux-x64.tar.xz
@@ -48,7 +54,7 @@ node -v
 npm -v
 </code></pre>
 <figure data-type="image" tabindex="1"><img src="https://superkoenigsegg.github.io/Miyagi.github.io/post-images/1593330693535.png" alt="" loading="lazy"></figure>
-<h1 id="安装mysql-mariadb此处有坑当然有可能是我自己安装的问题最终换成了mysql">安装mysql mariadb（此处有坑，当然有可能是我自己安装的问题，最终换成了mysql）</h1>
+<h2 id="安装mysql-mariadb此处有坑当然有可能是我自己安装的问题最终换成了mysql">安装mysql mariadb（此处有坑，当然有可能是我自己安装的问题，最终换成了mysql）</h2>
 <h3 id="私有库依赖数据库这里使用的是mariadb">私有库依赖数据库，这里使用的是mariadb</h3>
 <pre><code>yum -y install mariadb mariadb-server
 
@@ -61,7 +67,7 @@ systemctl enable mariadb.service
 // 其他按提示进行设置
 mysql_secure_installation
 </code></pre>
-<h1 id="安装cnpmjsorg">安装cnpmjs.org</h1>
+<h2 id="安装cnpmjsorg">安装cnpmjs.org</h2>
 <h3 id="cnpmjsorg选用目前稳定2194版本">cnpmjs.org选用目前稳定2.19.4版本</h3>
 <pre><code>npm i -g cnpmjs.org@2.19.4
 </code></pre>
@@ -220,7 +226,7 @@ userService: null,
 
 enableAbbreviatedMetadata: true
 </code></pre>
-<h1 id="建数据库并导入sql数据表">建数据库并导入sql数据表</h1>
+<h2 id="建数据库并导入sql数据表">建数据库并导入sql数据表</h2>
 <h3 id="在cnpmjsorg目录下登录数据库">在/cnpmjs.org目录下登录数据库</h3>
 <pre><code>mysql -uroot -pxxx  // xxx为你设置的密码
 </code></pre>
@@ -242,13 +248,13 @@ enableAbbreviatedMetadata: true
 <pre><code>port = 3306
 </code></pre>
 <h3 id="改了之后发现又出现了一些列不可描述的问题-emmm-算了还是直接安装mysql吧">改了之后发现又出现了一些列不可描述的问题 emmm😂 算了，还是直接安装mysql吧</h3>
-<h1 id="安装mysql">安装mysql</h1>
+<h2 id="安装mysql">安装mysql</h2>
 <p>我参考的这个<a href="https://www.jianshu.com/p/276d59cbc529">安装mysql</a></p>
 <h3 id="执行到第8步-8-添加软连接并重启mysql服务-这步时报错了">执行到第8步 8、添加软连接，并重启mysql服务 这步时报错了</h3>
 <pre><code>ln -s /usr/local/mysql/bin/mysql /usr/bin/mysql
 </code></pre>
 <h3 id="原因是-我之前的操作导致-usrbinmysql-已经存在了-删了在操作一遍就行了">原因是 我之前的操作导致 <code>/usr/bin/mysql</code> 已经存在了 删了在操作一遍就行了</h3>
-<h1 id="回到主线-运行服务">回到主线 运行服务</h1>
+<h2 id="回到主线-运行服务">回到主线 运行服务</h2>
 <pre><code>npm run start
 </code></pre>
 <h3 id="仓库访问地址1270017001web访问地址1270017002">仓库访问地址<code>127.0.0.1:7001</code>；web访问地址<code>127.0.0.1:7002</code></h3>
